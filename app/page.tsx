@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import CoinFlip from "@/components/coin-flip"
 import Statistics from "@/components/statistics"
 import SettingsComponent from "@/components/settings"
-import SoundManager from "@/components/sound-manager"
+import SoundManager, { playCoinFlipSound, playCoinResultSound } from "@/components/sound-manager"
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -20,6 +20,7 @@ export default function Home() {
   const [results, setResults] = useState<Array<{ result: string; timestamp: number }>>([])
   const [activeTab, setActiveTab] = useState("flip")
   const [customNames, setCustomNames] = useState({ heads: "Heads", tails: "Tails" })
+  const [soundsLoaded, setSoundsLoaded] = useState(false)
 
   // Toggle dark mode
   useEffect(() => {
@@ -54,36 +55,14 @@ export default function Home() {
     localStorage.setItem("customNames", JSON.stringify(customNames))
   }, [isDarkMode, isMuted, coinType, results, customNames])
 
-  // Update the flipCoin function to use a more reliable approach for sound playback
   const flipCoin = () => {
     if (isFlipping) return
 
     setIsFlipping(true)
     setResult(null)
 
-    // Play flip sound if not muted
-    if (!isMuted) {
-      try {
-        // Create a new audio context each time to avoid issues
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-
-        // Use a simple beep sound if the file can't be loaded
-        const oscillator = audioContext.createOscillator()
-        oscillator.type = "sine"
-        oscillator.frequency.setValueAtTime(440, audioContext.currentTime) // A4 note
-
-        const gainNode = audioContext.createGain()
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-
-        oscillator.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        oscillator.start()
-        oscillator.stop(audioContext.currentTime + 0.1)
-      } catch (e) {
-        console.log("Could not play sound:", e)
-      }
-    }
+    // Play flip sound
+    playCoinFlipSound()
 
     // Simulate multiple coin flips
     setTimeout(() => {
@@ -93,29 +72,8 @@ export default function Home() {
         newResults.push({ result: newResult, timestamp: Date.now() })
       }
 
-      // Play result sound if not muted
-      if (!isMuted) {
-        try {
-          // Create a new audio context each time to avoid issues
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-
-          // Use a simple beep sound if the file can't be loaded
-          const oscillator = audioContext.createOscillator()
-          oscillator.type = "sine"
-          oscillator.frequency.setValueAtTime(880, audioContext.currentTime) // A5 note
-
-          const gainNode = audioContext.createGain()
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-
-          oscillator.connect(gainNode)
-          gainNode.connect(audioContext.destination)
-
-          oscillator.start()
-          oscillator.stop(audioContext.currentTime + 0.1)
-        } catch (e) {
-          console.log("Could not play sound:", e)
-        }
-      }
+      // Play result sound
+      playCoinResultSound()
 
       setResults((prev) => [...newResults, ...prev])
       setResult(newResults[0].result)
@@ -125,7 +83,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <SoundManager isMuted={isMuted} />
+      <SoundManager 
+        isMuted={isMuted} 
+        onSoundLoad={loaded => setSoundsLoaded(loaded)} 
+      />
       <div className="max-w-md mx-auto">
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Coin Flip</h1>
@@ -202,4 +163,3 @@ export default function Home() {
     </main>
   )
 }
-
