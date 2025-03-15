@@ -56,33 +56,36 @@ export default function Home() {
   }, [isDarkMode, isMuted, coinType, results, customNames])
 
   const flipCoin = () => {
+    // Nepokračuj, pokud už animace běží
     if (isFlipping) return;
 
+    // Nastav stav na otáčení
     setIsFlipping(true);
     setResult(null);
 
-    // Přehrát zvuk otáčení
+    // Přehraj zvuk otáčení
     playCoinFlipSound();
 
-    // Delší čas pro zajištění dokončení animace
+    // Po stanovené době (1.5s) nastav výsledek a přehraj zvuk
     setTimeout(() => {
+      // Vytvoř nové výsledky pro počet mincí
       const newResults = [];
       for (let i = 0; i < coinCount; i++) {
         const newResult = Math.random() < 0.5 ? "heads" : "tails";
         newResults.push({ result: newResult, timestamp: Date.now() });
       }
 
-      // Přehrát zvuk výsledku
+      // Přehraj zvuk výsledku
       playCoinResultSound();
 
+      // Aktualizuj výsledky v historii a nastav aktuální výsledek
       setResults((prev) => [...newResults, ...prev]);
       setResult(newResults[0].result);
       
-      // Oddělení zjištění výsledku od ukončení animace
-      // Animace má 1.5s, tak počkáme 1.6s
+      // Ukonči animaci po dalších 200ms pro zajištění zobrazení výsledku
       setTimeout(() => {
         setIsFlipping(false);
-      }, 100);
+      }, 200);
     }, 1500);
   };
 
