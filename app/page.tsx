@@ -61,7 +61,6 @@ export default function Home() {
 
     // Nastav stav na otáčení
     setIsFlipping(true);
-    setResult(null);
 
     // Přehraj zvuk otáčení
     playCoinFlipSound();

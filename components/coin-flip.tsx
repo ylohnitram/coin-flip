@@ -39,16 +39,26 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
       
       // Resetujeme aktuální animaci
       coin.style.animation = "";
-      coin.style.transform = "rotateY(0deg)";
+      
+      // Nastavíme počáteční pozici dle předchozího výsledku nebo výchozí (heads)
+      if (result === "tails") {
+        coin.style.transform = "rotateY(180deg)";
+      } else {
+        coin.style.transform = "rotateY(0deg)";
+      }
       
       // Vynutíme reflow
       void coin.offsetHeight;
       
       // Vytvoříme animaci přímo v JS
+      // Upravíme animaci, aby respektovala počáteční pozici
+      const startDegrees = result === "tails" ? 180 : 0;
+      const endDegrees = startDegrees + degrees;
+      
       const animation = `
         @keyframes flip-coin-${Date.now()} {
-          from { transform: rotateY(0deg); }
-          to { transform: rotateY(${degrees}deg); }
+          from { transform: rotateY(${startDegrees}deg); }
+          to { transform: rotateY(${endDegrees}deg); }
         }
       `;
       
@@ -63,7 +73,9 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
       
       // Odstraníme vložený styl po dokončení animace
       setTimeout(() => {
-        document.head.removeChild(styleSheet);
+        if (styleSheet.parentNode) {
+          document.head.removeChild(styleSheet);
+        }
         showResult();
       }, 1500);
     } else if (result) {
