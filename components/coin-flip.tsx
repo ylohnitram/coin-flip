@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
 interface CoinFlipProps {
@@ -15,67 +15,64 @@ interface CoinFlipProps {
 
 export default function CoinFlip({ isFlipping, result, coinType, customNames }: CoinFlipProps) {
   const coinRef = useRef<HTMLDivElement>(null)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const flipCountRef = useRef(0)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Handle coin animation
+  // Řízení animace otáčení
   useEffect(() => {
-    if (!coinRef.current) return
-    
-    if (isFlipping && !isAnimating) {
-      setIsAnimating(true)
+    const coin = coinRef.current
+    const container = containerRef.current
+    if (!coin || !container) return
+
+    const showResult = () => {
+      coin.style.animation = "";
+      coin.style.transform = result === "heads" ? "rotateY(0deg)" : "rotateY(180deg)";
+    }
+
+    if (isFlipping) {
+      // Přidáme animaci nadskočení na kontejner
+      container.style.animation = "bounce 1.5s ease-in-out";
       
-      // Track number of flips to create different rotation each time
-      flipCountRef.current += 1
+      // Přidáme animaci rotace na minci
+      // Nastavíme náhodný počet otáček (5-10)
+      const rotations = 5 + Math.floor(Math.random() * 5);
+      const degrees = rotations * 360;
       
-      // Calculate random number of rotations (5-10 rotations)
-      const randomFlips = 5 + Math.floor(Math.random() * 5)
-      const randomDegrees = randomFlips * 180
+      // Resetujeme aktuální animaci
+      coin.style.animation = "";
+      coin.style.transform = "rotateY(0deg)";
       
-      // Add direction based on flip count (alternate direction occasionally)
-      const direction = flipCountRef.current % 2 === 0 ? 1 : -1
-      const finalDegrees = randomDegrees * direction
+      // Vynutíme reflow
+      void coin.offsetHeight;
       
-      // Apply animation immediately
-      coinRef.current.style.transition = "transform 0s"
-      coinRef.current.style.transform = "rotateY(0deg)"
-      
-      // Force reflow to ensure the animation will play
-      void coinRef.current.offsetHeight
-      
-      // Set the proper animation
-      coinRef.current.style.transition = "transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
-      coinRef.current.style.transform = `rotateY(${finalDegrees}deg)`
-      
-      // Listen for animation end
-      const handleTransitionEnd = () => {
-        if (!coinRef.current) return
-        setIsAnimating(false)
-      }
-      
-      coinRef.current.addEventListener('transitionend', handleTransitionEnd, { once: true })
-      
-      return () => {
-        if (coinRef.current) {
-          coinRef.current.removeEventListener('transitionend', handleTransitionEnd)
+      // Vytvoříme animaci přímo v JS
+      const animation = `
+        @keyframes flip-coin-${Date.now()} {
+          from { transform: rotateY(0deg); }
+          to { transform: rotateY(${degrees}deg); }
         }
-      }
-    }
-  }, [isFlipping, isAnimating])
-  
-  // Apply final position when result is available and animation is complete
-  useEffect(() => {
-    if (!isFlipping && result && !isAnimating && coinRef.current) {
-      // Set final state based on result
-      const finalRotation = result === "heads" ? "0deg" : "180deg"
+      `;
       
-      // Apply without animation
-      coinRef.current.style.transition = "transform 0.3s ease"
-      coinRef.current.style.transform = `rotateY(${finalRotation})`
+      // Vložíme animaci do dokumentu
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = animation;
+      document.head.appendChild(styleSheet);
+      
+      // Aplikujeme animaci
+      const animationName = animation.match(/@keyframes\s+([^\s{]+)/)?.[1] || '';
+      coin.style.animation = `${animationName} 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards`;
+      
+      // Odstraníme vložený styl po dokončení animace
+      setTimeout(() => {
+        document.head.removeChild(styleSheet);
+        showResult();
+      }, 1500);
+    } else if (result) {
+      // Nastavíme konečnou pozici bez animace
+      showResult();
     }
-  }, [isFlipping, result, isAnimating])
+  }, [isFlipping, result])
 
-  // Get coin styles based on coinType
+  // Získat styl mince podle typu
   const getCoinStyles = (type: string) => {
     switch (type) {
       case "gold":
@@ -96,16 +93,21 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
   }
 
   return (
-    <div className="perspective-1000 w-48 h-48 relative">
+    <div ref={containerRef} className="w-48 h-48 relative">
       <div
         ref={coinRef}
-        className={cn(
-          "w-full h-full relative preserve-3d transition-transform", 
-          isFlipping && "animate-bounce"
-        )}
+        className="w-full h-full relative"
+        style={{ 
+          perspective: "1000px",
+          transformStyle: "preserve-3d",
+          transition: "transform 0.3s ease" 
+        }}
       >
-        {/* Heads side */}
-        <div className="absolute w-full h-full backface-hidden rounded-full shadow-lg flex items-center justify-center">
+        {/* Heads strana */}
+        <div 
+          className="absolute w-full h-full rounded-full shadow-lg flex items-center justify-center"
+          style={{ backfaceVisibility: "hidden" }}
+        >
           <div
             className={cn(
               "w-full h-full rounded-full flex items-center justify-center text-center p-4",
@@ -116,8 +118,14 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
           </div>
         </div>
 
-        {/* Tails side */}
-        <div className="absolute w-full h-full backface-hidden rounded-full shadow-lg flex items-center justify-center rotate-y-180">
+        {/* Tails strana */}
+        <div 
+          className="absolute w-full h-full rounded-full shadow-lg flex items-center justify-center"
+          style={{ 
+            backfaceVisibility: "hidden",
+            transform: "rotateY(180deg)"
+          }}
+        >
           <div
             className={cn(
               "w-full h-full rounded-full flex items-center justify-center text-center p-4",
