@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 interface CoinFlipProps {
@@ -15,29 +15,63 @@ interface CoinFlipProps {
 
 export default function CoinFlip({ isFlipping, result, coinType, customNames }: CoinFlipProps) {
   const coinRef = useRef<HTMLDivElement>(null)
+  const [animationComplete, setAnimationComplete] = useState(true)
+  const lastFlipTimestampRef = useRef<number>(0)
 
+  // Zajistí, že je animace dokončena a spustí se jen jednou
   useEffect(() => {
     if (!coinRef.current) return
 
-    if (isFlipping) {
-      // Apply random flip animation
-      const randomFlips = 5 + Math.floor(Math.random() * 5) // 5-10 flips
-      const randomDegrees = randomFlips * 180
+    const currentTimestamp = Date.now()
 
-      coinRef.current.style.transform = `rotateY(${randomDegrees}deg)`
-      coinRef.current.style.transition = "transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
-    } else if (result) {
-      // Set final position based on result
+    if (isFlipping && animationComplete) {
+      // Animace se spouští pouze pokud uplynul minimální čas od poslední animace
+      if (currentTimestamp - lastFlipTimestampRef.current > 300) {
+        setAnimationComplete(false)
+        lastFlipTimestampRef.current = currentTimestamp
+        
+        // Aplikace náhodného počtu otočení
+        const randomFlips = 5 + Math.floor(Math.random() * 5) // 5-10 otočení
+        const randomDegrees = randomFlips * 180
+
+        // Reset stylu pro zajištění konzistentní animace
+        coinRef.current.style.transition = "none"
+        coinRef.current.offsetHeight // Force reflow
+        
+        // Aplikace animace
+        coinRef.current.style.transform = `rotateY(${randomDegrees}deg)`
+        coinRef.current.style.transition = "transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
+        
+        // Přidání listeneru na konec animace
+        const handleAnimationEnd = () => {
+          if (!coinRef.current) return
+          setAnimationComplete(true)
+        }
+        
+        coinRef.current.addEventListener('transitionend', handleAnimationEnd, { once: true })
+      }
+    } else if (!isFlipping && result && animationComplete) {
+      // Nastavení konečné pozice podle výsledku
       const finalRotation = result === "heads" ? 0 : 180
       coinRef.current.style.transform = `rotateY(${finalRotation}deg)`
-    } else {
-      // Reset position
-      coinRef.current.style.transform = "rotateY(0deg)"
-      coinRef.current.style.transition = "none"
     }
-  }, [isFlipping, result])
+  }, [isFlipping, result, animationComplete])
 
-  // Get coin styles based on coinType
+  // Reset animace při změně typu mince
+  useEffect(() => {
+    if (!isFlipping && coinRef.current) {
+      coinRef.current.style.transition = "none"
+      const finalRotation = result === "heads" ? 0 : 180
+      coinRef.current.style.transform = `rotateY(${finalRotation}deg)`
+      
+      // Force reflow
+      coinRef.current.offsetHeight
+      
+      coinRef.current.style.transition = "transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
+    }
+  }, [coinType, result, isFlipping])
+
+  // Získat styl mince podle typu
   const getCoinStyles = (type: string) => {
     switch (type) {
       case "gold":
@@ -61,9 +95,12 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
     <div className="perspective-1000 w-48 h-48 relative">
       <div
         ref={coinRef}
-        className={cn("w-full h-full relative preserve-3d transition-transform", isFlipping && "animate-bounce")}
+        className={cn(
+          "w-full h-full relative preserve-3d transition-transform", 
+          isFlipping && !animationComplete && "animate-bounce"
+        )}
       >
-        {/* Heads side */}
+        {/* Strana heads */}
         <div className="absolute w-full h-full backface-hidden rounded-full shadow-lg flex items-center justify-center">
           <div
             className={cn(
@@ -75,7 +112,7 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
           </div>
         </div>
 
-        {/* Tails side */}
+        {/* Strana tails */}
         <div className="absolute w-full h-full backface-hidden rounded-full shadow-lg flex items-center justify-center rotate-y-180">
           <div
             className={cn(

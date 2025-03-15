@@ -56,30 +56,35 @@ export default function Home() {
   }, [isDarkMode, isMuted, coinType, results, customNames])
 
   const flipCoin = () => {
-    if (isFlipping) return
+    if (isFlipping) return;
 
-    setIsFlipping(true)
-    setResult(null)
+    setIsFlipping(true);
+    setResult(null);
 
-    // Play flip sound
-    playCoinFlipSound()
+    // Přehrát zvuk otáčení
+    playCoinFlipSound();
 
-    // Simulate multiple coin flips
+    // Delší čas pro zajištění dokončení animace
     setTimeout(() => {
-      const newResults = []
+      const newResults = [];
       for (let i = 0; i < coinCount; i++) {
-        const newResult = Math.random() < 0.5 ? "heads" : "tails"
-        newResults.push({ result: newResult, timestamp: Date.now() })
+        const newResult = Math.random() < 0.5 ? "heads" : "tails";
+        newResults.push({ result: newResult, timestamp: Date.now() });
       }
 
-      // Play result sound
-      playCoinResultSound()
+      // Přehrát zvuk výsledku
+      playCoinResultSound();
 
-      setResults((prev) => [...newResults, ...prev])
-      setResult(newResults[0].result)
-      setIsFlipping(false)
-    }, 1500)
-  }
+      setResults((prev) => [...newResults, ...prev]);
+      setResult(newResults[0].result);
+      
+      // Oddělení zjištění výsledku od ukončení animace
+      // Animace má 1.5s, tak počkáme 1.6s
+      setTimeout(() => {
+        setIsFlipping(false);
+      }, 100);
+    }, 1500);
+  };
 
   return (
     <main className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
