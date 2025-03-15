@@ -160,6 +160,35 @@ export default function Home() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* SEO Text Content - hidden on smaller screens but visible to search engines */}
+      <section className="max-w-3xl mx-auto mt-12 px-4 text-gray-700 dark:text-gray-300 sm:block">
+        <h2 className="text-xl font-bold mb-4">About Coin Flip Tool</h2>
+        <p className="mb-3">
+          Need help making a random decision? Our Coin Flip Tool provides a simple, fair way to choose between two options. Whether you're deciding who goes first in a game, settling a friendly debate, or just need a random choice, our virtual coin toss gives you a quick answer.
+        </p>
+        
+        <h2 className="text-xl font-bold mt-6 mb-4">Features of Our Coin Flip App</h2>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>Realistic coin flip animation with sound effects</li>
+          <li>Customizable coin appearance (gold, silver, or bronze)</li>
+          <li>Option to flip multiple coins at once</li>
+          <li>Custom labels for heads and tails</li>
+          <li>Comprehensive statistics to track your results</li>
+          <li>Works offline with PWA support</li>
+          <li>Dark and light mode for comfortable use day or night</li>
+        </ul>
+        
+        <h2 className="text-xl font-bold mt-6 mb-4">How to Use the Coin Flipper</h2>
+        <p className="mb-3">
+          Using our coin flip tool is simple. Just press the "Flip coin" button and watch as the virtual coin spins in the air before revealing your result. You can customize the coin's appearance in the settings tab, and view your flip history in the statistics tab.
+        </p>
+        
+        <h2 className="text-xl font-bold mt-6 mb-4">Why Use a Virtual Coin Flip?</h2>
+        <p className="mb-3">
+          A virtual coin flip ensures complete randomness and eliminates any concerns about an uneven or weighted physical coin. It's also convenient when you don't have a real coin handy or need to flip multiple coins at once.
+        </p>
+      </section>
     </main>
   )
 }

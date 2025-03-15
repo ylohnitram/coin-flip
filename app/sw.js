@@ -1,6 +1,4 @@
-// Service worker for the Coin Flip PWA
-
-const CACHE_NAME = 'toss-cool-v1';
+const CACHE_NAME = 'coin-flip-v1';
 const urlsToCache = [
   '/',
   '/index.html',
