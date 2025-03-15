@@ -127,15 +127,12 @@ export default function Home() {
                 </Button>
               </div>
 
-              {result && (
+              {/* Display multiple coin results only after the flip animation is complete */}
+              {result && coinCount > 1 && !isFlipping && (
                 <div className="mt-4 text-center">
                   <p className="text-xl font-medium">
-                    {coinCount > 1
-                      ? `${results.slice(0, coinCount).filter((r) => r.result === "heads").length} ${customNames.heads} / 
-                         ${results.slice(0, coinCount).filter((r) => r.result === "tails").length} ${customNames.tails}`
-                      : result === "heads"
-                        ? customNames.heads
-                        : customNames.tails}
+                    {`${results.slice(0, coinCount).filter((r) => r.result === "heads").length} ${customNames.heads} / 
+                     ${results.slice(0, coinCount).filter((r) => r.result === "tails").length} ${customNames.tails}`}
                   </p>
                 </div>
               )}
@@ -171,7 +168,7 @@ export default function Home() {
         <h2 className="text-xl font-bold mt-6 mb-4">Features of Our Coin Flip App</h2>
         <ul className="list-disc pl-5 space-y-2">
           <li>Realistic coin flip animation with sound effects</li>
-          <li>Customizable coin appearance (gold, silver, or bronze)</li>
+          <li>Customizable coin appearance (gold, silver, bronze, white, black, blue)</li>
           <li>Option to flip multiple coins at once</li>
           <li>Custom labels for heads and tails</li>
           <li>Comprehensive statistics to track your results</li>

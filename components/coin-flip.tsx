@@ -37,6 +37,26 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
     }
   }, [isFlipping, result])
 
+  // Get coin styles based on coinType
+  const getCoinStyles = (type: string) => {
+    switch (type) {
+      case "gold":
+        return "bg-amber-400 border-4 border-amber-500"
+      case "silver":
+        return "bg-gray-300 border-4 border-gray-400"
+      case "bronze":
+        return "bg-amber-700 border-4 border-amber-800"
+      case "white":
+        return "bg-gray-100 border-4 border-gray-200 text-gray-800"
+      case "black":
+        return "bg-gray-800 border-4 border-gray-900 text-white"
+      case "blue":
+        return "bg-blue-500 border-4 border-blue-600 text-white"
+      default:
+        return "bg-amber-400 border-4 border-amber-500"
+    }
+  }
+
   return (
     <div className="perspective-1000 w-48 h-48 relative">
       <div
@@ -48,9 +68,7 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
           <div
             className={cn(
               "w-full h-full rounded-full flex items-center justify-center text-center p-4",
-              coinType === "gold" && "bg-amber-400 border-4 border-amber-500",
-              coinType === "silver" && "bg-gray-300 border-4 border-gray-400",
-              coinType === "bronze" && "bg-amber-700 border-4 border-amber-800",
+              getCoinStyles(coinType)
             )}
           >
             <span className="text-xl font-bold">{customNames.heads}</span>
@@ -62,9 +80,7 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
           <div
             className={cn(
               "w-full h-full rounded-full flex items-center justify-center text-center p-4",
-              coinType === "gold" && "bg-amber-400 border-4 border-amber-500",
-              coinType === "silver" && "bg-gray-300 border-4 border-gray-400",
-              coinType === "bronze" && "bg-amber-700 border-4 border-amber-800",
+              getCoinStyles(coinType)
             )}
           >
             <span className="text-xl font-bold">{customNames.tails}</span>
@@ -74,4 +90,3 @@ export default function CoinFlip({ isFlipping, result, coinType, customNames }: 
     </div>
   )
 }
-

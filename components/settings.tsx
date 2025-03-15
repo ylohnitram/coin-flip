@@ -73,6 +73,9 @@ export default function Settings({
               <SelectItem value="gold">Gold</SelectItem>
               <SelectItem value="silver">Silver</SelectItem>
               <SelectItem value="bronze">Bronze</SelectItem>
+              <SelectItem value="white">White</SelectItem>
+              <SelectItem value="black">Black</SelectItem>
+              <SelectItem value="blue">Blue</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -144,4 +147,3 @@ export default function Settings({
     </Card>
   )
 }
-
